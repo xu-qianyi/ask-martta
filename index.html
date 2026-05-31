@@ -208,28 +208,54 @@
     let started = false;
     let isTyping = false;
 
-    function buildPromptButtons(container, prompts) {
+    function makePromptBtn(p, isDefault) {
+      const btn = document.createElement('button');
+      btn.className = 'prompt-item' + (isDefault ? ' default-active' : '');
+      btn.innerHTML = `<span class="arrow">${isDefault ? '❯' : ' '}</span><span class="label"></span>`;
+      btn.addEventListener('mouseenter', () => {
+        btn.querySelector('.arrow').textContent = '❯';
+        btn.classList.add('default-active');
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.querySelector('.arrow').textContent = ' ';
+        btn.classList.remove('default-active');
+      });
+      btn.addEventListener('click', () => send(p));
+      return btn;
+    }
+
+    function buildPromptButtons(container, prompts, animate) {
       container.innerHTML = '';
-      prompts.forEach((p, i) => {
-        const btn = document.createElement('button');
-        const isDefault = i === 0 && !hasHovered && !started;
-        btn.className = 'prompt-item' + (isDefault ? ' default-active' : '');
-        btn.innerHTML = `<span class="arrow">${isDefault ? '❯' : ' '}</span>${p}`;
-        btn.addEventListener('mouseenter', () => {
-          if (!hasHovered) { hasHovered = true; buildPromptButtons(container, prompts); }
-          btn.querySelector('.arrow').textContent = '❯';
-          btn.classList.add('default-active');
+      if (!animate) {
+        prompts.forEach((p, i) => {
+          const isDefault = i === 0 && !hasHovered && !started;
+          const btn = makePromptBtn(p, isDefault);
+          btn.querySelector('.label').textContent = p;
+          container.appendChild(btn);
         });
-        btn.addEventListener('mouseleave', () => {
-          btn.querySelector('.arrow').textContent = ' ';
-          btn.classList.remove('default-active');
-        });
-        btn.addEventListener('click', () => send(p));
+        return;
+      }
+
+      // type each prompt one by one
+      let delay = 0;
+      prompts.forEach((p) => {
+        const btn = makePromptBtn(p, false);
+        const label = btn.querySelector('.label');
         container.appendChild(btn);
+        const startDelay = delay;
+        delay += p.length * 18 + 80;
+        setTimeout(() => {
+          let i = 0;
+          const iv = setInterval(() => {
+            i++;
+            label.textContent = p.slice(0, i);
+            if (i >= p.length) clearInterval(iv);
+          }, 18);
+        }, startDelay);
       });
     }
 
-    buildPromptButtons(document.getElementById('prompts'), getRandomPrompts(asked));
+    buildPromptButtons(document.getElementById('prompts'), getRandomPrompts(asked), false);
 
     const messagesEl     = document.getElementById('messages');
     const promptsAfterEl = document.getElementById('prompts-after');
@@ -280,7 +306,7 @@
             clearInterval(interval);
             isTyping = false;
             const next = getRandomPrompts(asked);
-            if (next.length > 0) buildPromptButtons(promptsAfterEl, next);
+            if (next.length > 0) buildPromptButtons(promptsAfterEl, next, true);
           }
         }, 18);
       }, 150);
