@@ -22,7 +22,6 @@
       color: #1C1C1E;
     }
 
-    /* macOS window */
     #window {
       width: 100%;
       max-width: 640px;
@@ -32,30 +31,14 @@
       border: 1px solid rgba(0,0,0,0.12);
     }
 
-    /* Title bar */
     #titlebar {
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
       height: 28px;
       background: linear-gradient(to bottom, #ECECEC, #E0E0E0);
       border-bottom: 1px solid #C8C8C8;
       user-select: none;
-      flex-shrink: 0;
-    }
-    #traffic-lights {
-      position: absolute;
-      left: 12px;
-      display: flex;
-      gap: 7px;
-      align-items: center;
-    }
-    .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.15);
     }
     #titlebar span {
       font-family: -apple-system, 'Helvetica Neue', sans-serif;
@@ -65,7 +48,6 @@
       letter-spacing: -0.01em;
     }
 
-    /* Terminal content */
     #terminal {
       background: #FFFFFF;
       padding: 12px 16px 16px;
@@ -78,7 +60,9 @@
     .ps1-green { color: #1E8C3A; }
     .ps1-text  { color: #1C1C1E; }
 
-    #prompts { margin-bottom: 6px; }
+    #prompts, #prompts-after { margin-bottom: 6px; }
+    #messages { margin-bottom: 2px; }
+    .msg { margin-bottom: 2px; }
 
     .prompt-item {
       display: flex;
@@ -101,9 +85,6 @@
     .prompt-item:hover,
     .prompt-item.default-active { background: rgba(0,0,0,0.05); }
     .prompt-item .arrow { width: 12px; flex-shrink: 0; color: #1E8C3A; }
-
-    #messages { margin-bottom: 2px; }
-    .msg { margin-bottom: 2px; }
 
     #input-line { display: flex; align-items: center; }
     #input-line input {
@@ -139,12 +120,10 @@
 <body>
 
   <div id="window">
-    <!-- Title bar -->
     <div id="titlebar">
       <span>martta@askHerAnything — zsh</span>
     </div>
 
-    <!-- Terminal content -->
     <div id="terminal">
       <div class="last-login" id="last-login">Last login: … from …</div>
 
@@ -165,32 +144,50 @@
   </div>
 
   <script>
-    const PROMPTS = [
-      "What do you design?",
-      "What are you working on?",
+    const ALL_PROMPTS = [
+      "What are you working on now?",
+      "Are you open to new roles?",
+      "What's your design process like?",
+      "What tools do you use?",
       "Where are you based?",
       "How can I reach you?",
+      "What kind of work excites you most?",
     ];
 
     const RESPONSES = {
-      design:   "I'm a product designer focused on the intersection of AI and workflow tools. I care a lot about how software feels to use - not just how it looks.",
-      working:  "Right now I'm designing at Datalign, building conversational data analysis tools that replace traditional BI dashboards. Small team - I own end-to-end design.",
-      based:    "I'm based in Boston, studying at Northeastern University. Graduating April 2026.",
-      contact:  "Best way is email - martta.xu@outlook.com. I'm also on LinkedIn and read every message.",
-      school:   "I study at Northeastern University - combined major in Design and Computer Science. Graduating April 2026.",
-      tools:    "Figma for everything visual. Framer and Next.js when I need to prototype in the browser. I write just enough code to know what's buildable.",
-      fallback: "Good question - but I didn't pre-program that one. Try martta.xu@outlook.com if you're genuinely curious.",
+      "What are you working on now?":
+        "Designing at Datalign, a fast-growing fintech building AI for wealth management. I'm their second design hire, building everything from the ground up.",
+      "Are you open to new roles?":
+        "Actively looking for full-time product design roles. Feel free to reach out.",
+      "What's your design process like?":
+        "Honestly, it depends on the problem. I used to live in Figma for everything, but lately I go straight to Claude Code for early exploration and sometimes even shipment.",
+      "What tools do you use?":
+        "Figma for most visual work. Claude Code and Codex when I need to prototype in the browser. Obsidian as my second brain, replacing Notion entirely.",
+      "Where are you based?":
+        "Based in Boston. Genuinely excited to relocate, open to anywhere the work is interesting.",
+      "How can I reach you?":
+        "Best way is email at martta.xu@outlook.com. Also on LinkedIn and I respond to every message.",
+      "What kind of work excites you most?":
+        "Problems where the design is the product. AI interfaces, new interaction patterns, tools that help people think. Less interested in pixel-pushing, more in figuring out what the thing should even be.",
     };
 
-    function getResponse(q) {
-      q = q.toLowerCase();
-      if (/design|designer|what do you do/.test(q)) return RESPONSES.design;
-      if (/working on|project|datalign|current/.test(q))  return RESPONSES.working;
-      if (/based|location|where|city|boston/.test(q))     return RESPONSES.based;
-      if (/contact|email|reach|hire|talk/.test(q))        return RESPONSES.contact;
-      if (/school|study|northeastern|nu|education/.test(q)) return RESPONSES.school;
-      if (/tool|figma|software|stack|code/.test(q))       return RESPONSES.tools;
-      return RESPONSES.fallback;
+    function getResponse(text) {
+      if (RESPONSES[text]) return RESPONSES[text];
+      const q = text.toLowerCase();
+      if (/working on|datalign|current/.test(q))       return RESPONSES["What are you working on now?"];
+      if (/open|role|job|hire|opportunit/.test(q))      return RESPONSES["Are you open to new roles?"];
+      if (/process|how do you work/.test(q))            return RESPONSES["What's your design process like?"];
+      if (/tool|figma|software|stack|code/.test(q))     return RESPONSES["What tools do you use?"];
+      if (/based|location|where|city|boston/.test(q))   return RESPONSES["Where are you based?"];
+      if (/contact|email|reach|talk/.test(q))           return RESPONSES["How can I reach you?"];
+      if (/excite|interest|kind of work/.test(q))       return RESPONSES["What kind of work excites you most?"];
+      return "Good question - I didn't pre-program that one. Try martta.xu@outlook.com if you're genuinely curious.";
+    }
+
+    function getRandomPrompts(asked) {
+      const remaining = ALL_PROMPTS.filter(p => !asked.has(p));
+      if (remaining.length <= 4) return remaining;
+      return [...remaining].sort(() => Math.random() - 0.5).slice(0, 4);
     }
 
     (function setLastLogin() {
@@ -206,18 +203,20 @@
         .catch(() => {});
     })();
 
+    const asked = new Set();
     let hasHovered = false;
     let started = false;
     let isTyping = false;
 
-    function buildPromptButtons(container) {
+    function buildPromptButtons(container, prompts) {
       container.innerHTML = '';
-      PROMPTS.forEach((p, i) => {
+      prompts.forEach((p, i) => {
         const btn = document.createElement('button');
-        btn.className = 'prompt-item' + (i === 0 && !hasHovered ? ' default-active' : '');
-        btn.innerHTML = `<span class="arrow">${i === 0 && !hasHovered ? '❯' : ' '}</span>${p}`;
+        const isDefault = i === 0 && !hasHovered && !started;
+        btn.className = 'prompt-item' + (isDefault ? ' default-active' : '');
+        btn.innerHTML = `<span class="arrow">${isDefault ? '❯' : ' '}</span>${p}`;
         btn.addEventListener('mouseenter', () => {
-          if (!hasHovered) { hasHovered = true; buildPromptButtons(container); }
+          if (!hasHovered) { hasHovered = true; buildPromptButtons(container, prompts); }
           btn.querySelector('.arrow').textContent = '❯';
           btn.classList.add('default-active');
         });
@@ -229,14 +228,15 @@
         container.appendChild(btn);
       });
     }
-    buildPromptButtons(document.getElementById('prompts'));
 
-    const messagesEl    = document.getElementById('messages');
+    buildPromptButtons(document.getElementById('prompts'), getRandomPrompts(asked));
+
+    const messagesEl     = document.getElementById('messages');
     const promptsAfterEl = document.getElementById('prompts-after');
-    const inputEl       = document.getElementById('input');
-    const cursorEl      = document.getElementById('cursor');
-    const promptsEl     = document.getElementById('prompts');
-    const terminalEl    = document.getElementById('terminal');
+    const inputEl        = document.getElementById('input');
+    const cursorEl       = document.getElementById('cursor');
+    const promptsEl      = document.getElementById('prompts');
+    const terminalEl     = document.getElementById('terminal');
 
     terminalEl.addEventListener('click', () => inputEl.focus());
     inputEl.addEventListener('focus', () => cursorEl.style.display = 'none');
@@ -253,6 +253,9 @@
       if (!text || isTyping) return;
       isTyping = true;
       started = true;
+
+      if (ALL_PROMPTS.includes(text)) asked.add(text);
+
       promptsEl.innerHTML = '';
       promptsAfterEl.innerHTML = '';
       inputEl.value = '';
@@ -276,7 +279,8 @@
           if (i >= response.length) {
             clearInterval(interval);
             isTyping = false;
-            buildPromptButtons(promptsAfterEl);
+            const next = getRandomPrompts(asked);
+            if (next.length > 0) buildPromptButtons(promptsAfterEl, next);
           }
         }, 18);
       }, 150);
