@@ -141,7 +141,7 @@
   <div id="window">
     <!-- Title bar -->
     <div id="titlebar">
-      <span>martta@portfolio — zsh</span>
+      <span>martta@askHerAnything — zsh</span>
     </div>
 
     <!-- Terminal content -->
@@ -149,7 +149,7 @@
       <div class="last-login" id="last-login">Last login: … from …</div>
 
       <div class="greeting">
-        <span class="ps1-green">martta</span><span class="ps1-text">@portfolio ~ % </span><span>ask me anything about Martta Xu.</span>
+        <span class="ps1-green">martta</span><span class="ps1-text">@askHerAnything ~ % </span><span>ask me anything about Martta Xu.</span>
       </div>
 
       <div id="prompts"></div>
@@ -157,7 +157,7 @@
       <div id="prompts-after"></div>
 
       <div id="input-line">
-        <span class="ps1-green">martta</span><span class="ps1-text">@portfolio ~ %&nbsp;</span>
+        <span class="ps1-green">martta</span><span class="ps1-text">@askHerAnything ~ % </span>
         <input id="input" type="text" autocomplete="off" spellcheck="false" />
         <span id="cursor"></span>
       </div>
@@ -245,7 +245,7 @@
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') send(inputEl.value); });
 
     function ps1() {
-      return `<span class="ps1-green">martta</span><span class="ps1-text">@portfolio ~ % </span>`;
+      return `<span class="ps1-green">martta</span><span class="ps1-text">@askHerAnything ~ % </span>`;
     }
 
     function send(text) {
